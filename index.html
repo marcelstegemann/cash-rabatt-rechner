@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cash-Rabatt Rechner</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #f0f2f5; }
+      input:focus, select:focus { outline: none; }
+      ::placeholder { color: #94a3b8; }
+      @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+      button:active { transform: scale(0.97) !important; }
+      details > summary { list-style: none; }
+      details > summary::-webkit-details-marker { display: none; }
+    </style>
+
+    <style>
+      :root{
+        --navy:#0c1b3a;
+        --orange:#f26522;
+        --orangeLight:#fff7f2;
+        --green:#10b981;
+        --greenBg:#ecfdf5;
+        --greenBorder:#a7f3d0;
+        --warnBg:#fffbeb;
+        --warnBorder:#fde68a;
+        --warnText:#92400e;
+        --gray50:#f8fafc;
+        --gray100:#f1f5f9;
+        --gray200:#e2e8f0;
+        --gray300:#cbd5e1;
+        --gray400:#94a3b8;
+        --gray600:#475569;
+        --gray700:#334155;
+        --gray800:#1e293b;
+        --white:#ffffff;
+        --radiusSm:10px;
+        --radius:14px;
+        --font:'DM Sans', system-ui, sans-serif;
+        --mono:'JetBrains Mono', monospace;
+      }
+
+      .page{
+        min-height: 100vh;
+        display:flex;
+        align-items:flex-start;
+        justify-content:center;
+        padding: 24px 16px 48px;
+        font-family: var(--font);
+        background: linear-gradient(135deg, var(--gray100) 0%, #e8ecf2 100%);
+      }
+      .card{
+        width:100%;
+        max-width:460px;
+        background:var(--white);
+        border-radius:20px;
+        box-shadow: 0 4px 32px rgba(12,27,58,.08), 0 1px 4px rgba(12,27,58,.04);
+        overflow:hidden;
+      }
+      .header{
+        position:relative;
+        background: linear-gradient(160deg, var(--navy) 0%, #162d5a 100%);
+        padding: 28px 24px 24px;
+        overflow:hidden;
+      }
+      .headerContent{ position:relative; z-index:1; }
+      .headerDeco{
+        position:absolute; top:-40px; right:-40px;
+        width:140px; height:140px; border-radius:50%;
+        background: rgba(242,101,34,.15);
+      }
+      .logoBar{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+      .logoMark{
+        width:32px; height:32px; border-radius:8px;
+        background: var(--orange); color: var(--white);
+        display:flex; align-items:center; justify-content:center;
+        font-weight:700; font-size:16px;
+      }
+      .badge{
+        font-size:10px; font-weight:700; letter-spacing:1.5px; color: var(--orange);
+        background: rgba(242,101,34,.15);
+        padding: 3px 8px; border-radius:6px;
+      }
+      .title{ font-size:22px; font-weight:700; color: var(--white); line-height:1.2; margin-bottom:6px; }
+      .subtitle{ font-size:13px; color: rgba(255,255,255,.6); font-weight:400; line-height:1.4; }
+
+      .form{ padding: 24px 24px 0; }
+      .fieldGroup{ margin-bottom:18px; }
+      .label{
+        display:block; font-size:11px; font-weight:700; color: var(--gray600);
+        letter-spacing:.5px; text-transform:uppercase; margin-bottom:8px;
+      }
+
+      .segControl{
+        display:flex;
+        border: 2px solid var(--gray200);
+        border-radius: var(--radiusSm);
+        overflow:hidden;
+      }
+      .segBtn{
+        flex:1;
+        padding: 11px 8px;
+        font-size:13px; font-weight:600;
+        font-family: var(--font);
+        border:none;
+        background: var(--gray50);
+        color: var(--gray600);
+        cursor:pointer;
+        transition: all .15s;
+      }
+      .segBtnActive{ background: var(--navy); color: var(--white); }
+      .segBtnActiveOrange{ background: var(--orange); color: var(--white); }
+
+      .inputWrap{
+        display:flex; align-items:center;
+        border: 2px solid var(--gray200);
+        border-radius: var(--radiusSm);
+        background: var(--gray50);
+        overflow:hidden;
+      }
+      .inputError{ border-color:#ef4444; }
+      .prefix{
+        padding: 0 0 0 14px;
+        font-size:16px; font-weight:700;
+        color: var(--gray400);
+        user-select:none;
+      }
+      .input{
+        flex:1; border:none; background:transparent;
+        padding: 14px 14px 14px 8px;
+        font-size:18px; font-weight:500;
+        font-family: var(--mono);
+        color: var(--gray800);
+        width:100%;
+      }
+      .errorText{ font-size:12px; color:#ef4444; margin-top:4px; display:block; }
+
+      .selectWrap{
+        position:relative;
+        border: 2px solid var(--gray200);
+        border-radius: var(--radiusSm);
+        background: var(--gray50);
+        overflow:hidden;
+      }
+      .select{
+        width:100%;
+        appearance:none;
+        border:none;
+        background:transparent;
+        padding: 14px 40px 14px 14px;
+        font-size:15px; font-weight:500;
+        color: var(--gray800);
+        font-family: var(--font);
+        cursor:pointer;
+      }
+      .selectArrow{
+        position:absolute;
+        right:14px; top:50%;
+        transform: translateY(-50%);
+        pointer-events:none;
+        color: var(--gray400);
+        font-size:16px;
+      }
+
+      .btnRow{ display:flex; gap:10px; margin-bottom:24px; }
+      .btnPrimary{
+        flex:1;
+        padding: 14px 0;
+        background: var(--orange);
+        color: var(--white);
+        font-size:15px; font-weight:700;
+        border:none;
+        border-radius: var(--radiusSm);
+        cursor:pointer;
+        font-family: var(--font);
+        box-shadow: 0 4px 14px rgba(242,101,34,.3);
+      }
+      .btnSecondary{
+        padding: 14px 20px;
+        background: var(--gray100);
+        color: var(--gray600);
+        font-size:14px; font-weight:600;
+        border: 1px solid var(--gray200);
+        border-radius: var(--radiusSm);
+        cursor:pointer;
+        font-family: var(--font);
+      }
+
+      .resultBox{
+        margin: 0 24px 16px;
+        padding: 20px;
+        border-radius: var(--radius);
+        text-align:center;
+        border: 2px solid transparent;
+      }
+      .resultOk{ background: var(--greenBg); border-color: var(--greenBorder); }
+      .resultWarn{ background: var(--warnBg); border-color: var(--warnBorder); }
+      .resultIcon{ font-size:28px; margin-bottom:8px; }
+      .resultMsg{ font-size:14px; font-weight:600; color: var(--warnText); line-height:1.5; }
+
+      .resultRate{ margin-bottom:4px; }
+      .rateNum{ font-size:48px; font-weight:700; font-family: var(--mono); color: var(--green); line-height:1; }
+      .ratePercent{ font-size:22px; font-weight:700; color: var(--green); margin-left:2px; }
+      .resultLabel{
+        font-size:12px; font-weight:600; color: var(--gray600);
+        text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
+      }
+      .resultMeta{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+      .metaChip{
+        display:inline-block;
+        font-size:11px; font-weight:600;
+        color: var(--gray600);
+        background: rgba(16,185,129,.12);
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+
+      .breakdownBox{
+        margin: 0 24px 24px;
+        padding: 18px 18px 14px;
+        border-radius: var(--radius);
+        background: var(--gray50);
+        border: 1px solid var(--gray200);
+      }
+      .breakdownTitle{
+        font-size:12px; font-weight:700; color: var(--navy);
+        text-transform:uppercase;
+        letter-spacing:.8px;
+        margin-bottom:14px;
+        padding-bottom:10px;
+        border-bottom: 2px solid var(--navy);
+      }
+      .bRow{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding: 7px 8px;
+        border-radius: 6px;
+        margin-bottom:2px;
+      }
+      .bRowHighlight{ background: var(--orangeLight); border:1px solid #fde0cc; }
+      .bLabel{ font-size:13px; color: var(--gray700); }
+      .bLabelBold{ font-weight:700; color: var(--gray800); }
+      .bLabelSub{ font-size:12px; color: var(--gray400); padding-left:8px; }
+      .bValue{ font-size:13px; font-family: var(--mono); font-weight:500; text-align:right; color: var(--gray700); }
+      .bValueBold{ font-weight:700; font-size:14px; color: var(--gray800); }
+      .bValueSub{ font-size:12px; }
+      .bDivider{ height:1px; background: var(--gray200); margin: 6px 0; }
+
+      .details{
+        margin: 0 24px 20px;
+        border-radius: var(--radiusSm);
+        border: 1px solid var(--gray200);
+        overflow:hidden;
+      }
+      .summary{
+        padding: 12px 16px;
+        font-size:13px; font-weight:600;
+        color: var(--gray600);
+        cursor:pointer;
+        background: var(--gray50);
+        user-select:none;
+        display:flex; justify-content:space-between; align-items:center;
+      }
+      .chevron{ font-size:16px; font-weight:700; }
+      details[open] .chevron{ transform: rotate(90deg); display:inline-block; }
+      .detailsContent{ padding: 12px 16px 16px; }
+      .staffelBlock{ margin-bottom:14px; }
+      .staffelTitle{
+        font-size:12px; font-weight:700; color: var(--navy);
+        text-transform:uppercase;
+        letter-spacing:.5px;
+        margin-bottom:6px;
+      }
+      .staffelRow{
+        display:flex; justify-content:space-between;
+        font-size:13px; color: var(--gray700);
+        padding: 4px 0;
+        border-bottom: 1px solid var(--gray100);
+      }
+      .staffelRate{ font-weight:700; font-family: var(--mono); color: var(--navy); }
+
+      .footer{
+        padding: 16px 24px;
+        display:flex; justify-content:space-between;
+        font-size:10px; color: var(--gray400);
+        border-top: 1px solid var(--gray100);
+      }
+
+      .hidden{ display:none !important; }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="card">
+        <div class="header">
+          <div class="headerContent">
+            <div class="logoBar">
+              <div class="logoMark">S</div>
+              <span class="badge">INTERN</span>
+            </div>
+            <h1 class="title">Cash-Rabatt Rechner</h1>
+            <p class="subtitle">Konditionsberechnung für Mediabrutto &lt; 100.000 €</p>
+          </div>
+          <div class="headerDeco"></div>
+        </div>
+
+        <div class="form">
+          <!-- Input Mode Toggle -->
+          <div class="fieldGroup">
+            <label class="label">Eingabewert</label>
+            <div class="segControl" id="modeToggle">
+              <button type="button" class="segBtn segBtnActive" data-mode="forward">Kundenbrutto</button>
+              <button type="button" class="segBtn" data-mode="reverse">Agenturnetto</button>
+            </div>
+          </div>
+
+          <!-- Value Input -->
+          <div class="fieldGroup">
+            <label class="label" id="valueLabel">Kundenbrutto (€)</label>
+            <div class="inputWrap" id="inputWrap">
+              <span class="prefix">€</span>
+              <input
+                id="valueInput"
+                class="input"
+                type="text"
+                inputmode="decimal"
+                placeholder="z. B. 65.000"
+                autocomplete="off"
+              />
+            </div>
+            <span class="errorText hidden" id="errorText">Bitte einen gültigen Betrag eingeben.</span>
+          </div>
+
+          <!-- Werbeträgergruppe -->
+          <div class="fieldGroup">
+            <label class="label">Werbeträgergruppe</label>
+            <div class="selectWrap">
+              <select id="groupSelect" class="select">
+                <option value="ppv">PPV / PV / Klassik</option>
+                <option value="vkm">VKM / Station</option>
+              </select>
+              <div class="selectArrow">▾</div>
+            </div>
+          </div>
+
+          <!-- AE Toggle -->
+          <div class="fieldGroup">
+            <label class="label">Kundentyp</label>
+            <div class="segControl" id="aeToggle">
+              <button type="button" class="segBtn segBtnActiveOrange" data-ae="true">
+                Agenturkunde (15 % AE)
+              </button>
+              <button type="button" class="segBtn" data-ae="false">
+                Direktkunde (keine AE)
+              </button>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="btnRow">
+            <button type="button" class="btnPrimary" id="calcBtn">Berechnen</button>
+            <button type="button" class="btnSecondary" id="resetBtn">Reset</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="resultRoot" class="hidden"></div>
+
+        <!-- Staffel Reference -->
+        <details class="details" id="staffelDetails">
+          <summary class="summary">
+            <span>Rabattstaffel anzeigen</span>
+            <span class="chevron">›</span>
+          </summary>
+          <div class="detailsContent" id="staffelContent"></div>
+        </details>
+
+        <div class="footer">
+          <span>Commercial Management · Ströer Media Solutions</span>
+          <span style="opacity:.5">Nur für interne Nutzung</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const STAFFEL = {
+        ppv: {
+          label: "PPV / PV / Klassik",
+          tiers: [
+            { min: 75000, rate: 7.5 },
+            { min: 50000, rate: 5.0 },
+            { min: 25000, rate: 3.0 },
+          ],
+        },
+        vkm: {
+          label: "VKM / Station",
+          tiers: [
+            { min: 75000, rate: 4.5 },
+            { min: 50000, rate: 3.0 },
+            { min: 25000, rate: 2.0 },
+          ],
+        },
+      };
+
+      function formatEur(v) {
+        return new Intl.NumberFormat("de-DE", {
+          style: "currency",
+          currency: "EUR",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(v);
+      }
+
+      function formatEurShort(v) {
+        return new Intl.NumberFormat("de-DE", {
+          style: "currency",
+          currency: "EUR",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(v);
+      }
+
+      function parseBrutto(raw) {
+        if (!raw) return NaN;
+        let cleaned = String(raw).replace(/\s/g, "").replace(/€/g, "");
+        if (/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(cleaned)) {
+          cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+        } else {
+          cleaned = cleaned.replace(",", ".");
+        }
+        return parseFloat(cleaned);
+      }
+
+      function findTier(staffel, kundenbrutto) {
+        return staffel.tiers.find((t) => kundenbrutto >= t.min) || null;
+      }
+
+      function calcForward(brutto, group, hasAE) {
+        const kb = parseBrutto(brutto);
+        if (isNaN(kb) || kb <= 0) return { error: "invalid" };
+        if (kb >= 100000)
+          return { error: "over100k", message: "Mediabrutto ≥ 100.000 € — bitte an Commercial Management wenden." };
+        const staffel = STAFFEL[group];
+        const tier = findTier(staffel, kb);
+        if (!tier)
+          return { error: "noTier", message: "Unter 25.000 € ist keine Staffel definiert. Bitte Rücksprache mit Commercial Management." };
+
+        const crRate = tier.rate / 100;
+        const cr = kb * crRate;
+        const kn = kb - cr;
+        const ae = hasAE ? kn * 0.15 : 0;
+        const agn = kn - ae;
+
+        return {
+          mode: "forward",
+          kundenbrutto: kb,
+          crRate: tier.rate,
+          crAbs: cr,
+          kundennetto: kn,
+          aeRate: hasAE ? 15 : 0,
+          aeAbs: ae,
+          agenturnetto: agn,
+          tierLabel: `ab ${formatEurShort(tier.min)} → ${tier.rate.toFixed(1)} %`,
+          hasAE,
+        };
+      }
+
+      function calcReverse(agnInput, group, hasAE) {
+        const agn = parseBrutto(agnInput);
+        if (isNaN(agn) || agn <= 0) return { error: "invalid" };
+
+        const kn = hasAE ? agn / 0.85 : agn;
+        const staffel = STAFFEL[group];
+
+        let matched = null;
+        for (const tier of staffel.tiers) {
+          const kb = kn / (1 - tier.rate / 100);
+          if (kb >= tier.min) {
+            matched = { tier, kb };
+            break;
+          }
+        }
+
+        if (!matched) {
+          const kb = kn;
+          if (kb < 25000)
+            return { error: "noTier", message: "Rückrechnung ergibt ein Kundenbrutto unter 25.000 €. Keine Staffel definiert." };
+          return { error: "noTier", message: "Konnte keine passende Staffel ermitteln." };
+        }
+
+        const { tier, kb } = matched;
+        if (kb >= 100000)
+          return { error: "over100k", message: "Rückrechnung ergibt Kundenbrutto ≥ 100.000 € — bitte an Commercial Management wenden." };
+
+        const crRate = tier.rate / 100;
+        const cr = kb * crRate;
+        const ae = hasAE ? kn * 0.15 : 0;
+
+        return {
+          mode: "reverse",
+          kundenbrutto: kb,
+          crRate: tier.rate,
+          crAbs: cr,
+          kundennetto: kn,
+          aeRate: hasAE ? 15 : 0,
+          aeAbs: ae,
+          agenturnetto: agn,
+          tierLabel: `ab ${formatEurShort(tier.min)} → ${tier.rate.toFixed(1)} %`,
+          hasAE,
+        };
+      }
+
+      // --- UI state ---
+      let inputMode = "forward";
+      let group = "ppv";
+      let hasAE = true;
+      let touched = false;
+
+      // --- Elements ---
+      const modeToggle = document.getElementById("modeToggle");
+      const aeToggle = document.getElementById("aeToggle");
+      const valueLabel = document.getElementById("valueLabel");
+      const valueInput = document.getElementById("valueInput");
+      const groupSelect = document.getElementById("groupSelect");
+      const calcBtn = document.getElementById("calcBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const resultRoot = document.getElementById("resultRoot");
+      const inputWrap = document.getElementById("inputWrap");
+      const errorText = document.getElementById("errorText");
+      const staffelContent = document.getElementById("staffelContent");
+
+      function setMode(newMode){
+        inputMode = newMode;
+        touched = false;
+        clearResult();
+
+        [...modeToggle.querySelectorAll("button")].forEach(btn=>{
+          btn.classList.toggle("segBtnActive", btn.dataset.mode === inputMode);
+        });
+
+        valueLabel.textContent = inputMode === "forward" ? "Kundenbrutto (€)" : "Agenturnetto (€)";
+        valueInput.placeholder = inputMode === "forward" ? "z. B. 65.000" : "z. B. 45.000";
+        validate();
+      }
+
+      function setAE(newHasAE){
+        hasAE = newHasAE;
+        clearResult();
+        const buttons = [...aeToggle.querySelectorAll("button")];
+        buttons.forEach(btn=>{
+          const isTrue = btn.dataset.ae === "true";
+          btn.classList.toggle("segBtnActiveOrange", (isTrue && hasAE) || (!isTrue && !hasAE));
+        });
+      }
+
+      function setGroup(newGroup){
+        group = newGroup;
+        clearResult();
+      }
+
+      function clearResult(){
+        resultRoot.innerHTML = "";
+        resultRoot.classList.add("hidden");
+      }
+
+      function validate(){
+        const v = valueInput.value;
+        const num = parseBrutto(v);
+        const isEmpty = !v;
+        const isInvalid = touched && (isEmpty || isNaN(num) || num <= 0);
+
+        inputWrap.classList.toggle("inputError", isInvalid);
+        errorText.classList.toggle("hidden", !isInvalid);
+        return !isInvalid;
+      }
+
+      function renderWarn(message, icon){
+        resultRoot.classList.remove("hidden");
+        resultRoot.innerHTML = `
+          <div class="resultBox resultWarn" style="animation: slideUp .3s ease-out">
+            <div class="resultIcon">${icon}</div>
+            <p class="resultMsg">${message}</p>
+          </div>
+        `;
+      }
+
+      function rowHTML({ label, value, bold=false, sub=false, highlight=false }){
+        const clsRow = `bRow ${highlight ? "bRowHighlight" : ""}`;
+        const clsLabel = `bLabel ${bold ? "bLabelBold" : ""} ${sub ? "bLabelSub" : ""}`;
+        const clsValue = `bValue ${bold ? "bValueBold" : ""} ${sub ? "bValueSub" : ""}`;
+
+        let color = "";
+        if (value < 0) color = "color:#dc2626";
+        else if (value === 0) color = "color: var(--gray400)";
+        else color = bold ? "color: var(--gray800)" : "color: var(--gray700)";
+
+        const sign = value < 0 ? "– " : "";
+        const abs = Math.abs(value);
+
+        return `
+          <div class="${clsRow}">
+            <span class="${clsLabel}">${label}</span>
+            <span class="${clsValue}" style="${color}">
+              ${sign}${formatEur(abs)}
+            </span>
+          </div>
+        `;
+      }
+
+      function dividerHTML(){
+        return `<div class="bDivider"></div>`;
+      }
+
+      function renderOk(result){
+        const staffelLabel = STAFFEL[group].label;
+
+        const highlightKB = inputMode === "forward";
+        const highlightAGN = inputMode === "reverse";
+
+        const aeRows = result.hasAE
+          ? (
+            rowHTML({ label: `./. AE (${result.aeRate} %)` , value: -result.aeAbs, sub:true }) +
+            dividerHTML()
+          )
+          : (
+            rowHTML({ label: "./. AE (keine – Direktkunde)", value: 0, sub:true }) +
+            dividerHTML()
+          );
+
+        resultRoot.classList.remove("hidden");
+        resultRoot.innerHTML = `
+          <div style="animation: slideUp .3s ease-out">
+            <div class="resultBox resultOk">
+              <div class="resultRate">
+                <span class="rateNum">${result.crRate.toFixed(1)}</span>
+                <span class="ratePercent">%</span>
+              </div>
+              <p class="resultLabel">Max. zulässiger Cash-Rabatt</p>
+              <div class="resultMeta">
+                <span class="metaChip">${result.tierLabel}</span>
+                <span class="metaChip">${staffelLabel}</span>
+                <span class="metaChip">${result.hasAE ? "Agenturkunde" : "Direktkunde"}</span>
+              </div>
+            </div>
+
+            <div class="breakdownBox">
+              <p class="breakdownTitle">Konditionsübersicht</p>
+
+              ${rowHTML({ label:"Kundenbrutto (bezahlt)", value: result.kundenbrutto, bold:true, highlight: highlightKB })}
+              ${rowHTML({ label:`./. Cash-Rabatt (${result.crRate.toFixed(1)} %)`, value: -result.crAbs, sub:true })}
+              ${dividerHTML()}
+              ${rowHTML({ label:"Kundennetto (Netto 1)", value: result.kundennetto, bold:true })}
+              ${aeRows}
+              ${rowHTML({ label:"Agenturnetto (Netto 2)", value: result.agenturnetto, bold:true, highlight: highlightAGN })}
+            </div>
+          </div>
+        `;
+      }
+
+      function handleCalc(){
+        touched = true;
+        if (!validate()) return;
+
+        const v = valueInput.value;
+        if (!v) return;
+
+        const r = inputMode === "forward"
+          ? calcForward(v, group, hasAE)
+          : calcReverse(v, group, hasAE);
+
+        if (r.error){
+          const icon = (r.error === "over100k") ? "⚠️" : "ℹ️";
+          renderWarn(r.message || "Bitte einen gültigen Betrag eingeben.", icon);
+        } else {
+          renderOk(r);
+        }
+      }
+
+      function reset(){
+        valueInput.value = "";
+        groupSelect.value = "ppv";
+        setGroup("ppv");
+        setAE(true);
+        setMode("forward");
+        touched = false;
+        validate();
+        clearResult();
+      }
+
+      // --- Staffel rendern ---
+      function renderStaffel(){
+        const blocks = Object.entries(STAFFEL).map(([key, s])=>{
+          const rows = [...s.tiers].reverse().map(t=>`
+            <div class="staffelRow">
+              <span>ab ${formatEurShort(t.min)}</span>
+              <span class="staffelRate">${t.rate.toFixed(1)} %</span>
+            </div>
+          `).join("");
+          return `
+            <div class="staffelBlock">
+              <p class="staffelTitle">${s.label}</p>
+              ${rows}
+            </div>
+          `;
+        }).join("");
+        staffelContent.innerHTML = blocks;
+      }
+
+      // --- Events ---
+      modeToggle.addEventListener("click", (e)=>{
+        const btn = e.target.closest("button[data-mode]");
+        if (!btn) return;
+        setMode(btn.dataset.mode);
+      });
+
+      aeToggle.addEventListener("click", (e)=>{
+        const btn = e.target.closest("button[data-ae]");
+        if (!btn) return;
+        setAE(btn.dataset.ae === "true");
+      });
+
+      groupSelect.addEventListener("change", (e)=> setGroup(e.target.value));
+
+      valueInput.addEventListener("input", ()=>{
+        touched = false;
+        validate();
+        clearResult();
+      });
+
+      valueInput.addEventListener("keydown", (e)=>{
+        if (e.key === "Enter"){
+          e.preventDefault();
+          handleCalc();
+        }
+      });
+
+      calcBtn.addEventListener("click", handleCalc);
+      resetBtn.addEventListener("click", reset);
+
+      // init
+      renderStaffel();
+      setMode("forward");
+      setAE(true);
+      validate();
+    </script>
+  </body>
+</html>
